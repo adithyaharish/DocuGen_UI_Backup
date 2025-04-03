@@ -11,6 +11,17 @@
   margin-bottom: 1.5rem;
 }
 
+.documentation-panel {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 1rem; /* Space between documentation and chat */
+  padding: 1rem;
+  background-color: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+}
+
+
 .doc-header {
   display: flex;
   justify-content: space-between;

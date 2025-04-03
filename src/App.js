@@ -28,6 +28,7 @@ function App() {
 
   const handleGenerateDocs = async () => {
     if (!githubLink.trim()) return;
+    setChatMessages([]); 
     setIsProcessing(true);
     setDocumentation("");
 
@@ -112,15 +113,20 @@ function App() {
 
 
       const data = await response.json();
+      // Add the isMarkdown flag for system messages to trigger custom markdown rendering
       setChatMessages((prev) => [
         ...prev,
-        { sender: "system", text: data.chatResponse || "No response received." },
+        {
+          sender: "system",
+          text: data.chatResponse || "No response received.",
+          isMarkdown: true,
+        },
       ]);
     } catch (error) {
       console.error("Error in chat interaction:", error);
       setChatMessages((prev) => [
         ...prev,
-        { sender: "system", text: "Error processing request." },
+        { sender: "system", text: "Error processing request.", isMarkdown: true },
       ]);
     } finally {
       setIsChatLoading(false);
