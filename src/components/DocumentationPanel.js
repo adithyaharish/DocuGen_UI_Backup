@@ -1,10 +1,5 @@
 
-
-
-
-
-
-import React, { useState } from "react";
+import React, { useState, useRef  } from "react";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 import { jsPDF } from "jspdf";
@@ -13,9 +8,13 @@ import { FaCopy, FaCheck, FaDownload, FaEdit, FaEye } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import "./DocumentationPanel.css";
 
-const DocumentationPanel = ({ documentation, setDocumentation }) => {
+const DocumentationPanel = ({ documentation, setDocumentation, branches }) => {
   const [copied, setCopied] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  
+  const [showSetup, setShowSetup] = useState(false);
+  const [setupContent, setSetupContent] = useState("");
+  const [isLoadingSetup, setIsLoadingSetup] = useState(false);
 
   const downloadPDF = () => {
     const input = document.getElementById("doc-content");
@@ -71,8 +70,58 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
       });
   };
 
+
+  const handleSetupGuide = async () => {
+    setIsLoadingSetup(true);
+    try {
+      const response = await fetch("http://localhost:5000/setup-guide", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ documentation })
+      });
+  
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+  
+      if (!data.setupGuide) throw new Error("Missing 'setupGuide' in response");
+  
+      setSetupContent(data.setupGuide);
+    } catch (err) {
+      console.error("Setup Guide fetch failed:", err);
+      setSetupContent("⚠️ Failed to load setup guide. Please try again later.");
+    } finally {
+      setShowSetup(true);
+      setIsLoadingSetup(false);
+    }
+  };
+
+  
   return (
-    <div className="documentation-panel">
+
+    <div className="documentation-panel-wrapper" style={{ position: "relative" }}>
+    {isLoadingSetup && (
+      <div className="setup-loading-overlay">
+        <div className="spinner" />
+      </div>
+    )}
+
+    <div className={`documentation-panel ${isLoadingSetup ? "blurred" : ""}`}>
+
+{showSetup ? (
+          <div className="full-panel-popup">
+            <div className="popup-header">
+              <h2>Setup Guide</h2>
+              <button className="close-btn" onClick={() => setShowSetup(false)}>❌</button>
+            </div>
+            <div className="popup-body">
+              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+                {setupContent}
+              </ReactMarkdown>
+            </div>
+          </div>
+        ) : (
+          <>
+
       <div className="doc-header">
         <h2>Generated Documentation</h2>
         <div className="button-group">
@@ -104,6 +153,11 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
           >
             {isEditing ? <FaEye /> : <FaEdit />} {isEditing ? "Preview" : "Edit"}
           </button>
+
+          <button className="download-btn" onClick={handleSetupGuide}>
+                  Setup Guide
+                </button>
+
         </div>
       </div>
 
@@ -129,6 +183,10 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
           </ReactMarkdown>
         )}
       </div>
+
+      </>
+        )}
+    </div>
     </div>
   );
 };

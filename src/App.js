@@ -23,10 +23,14 @@ function App() {
   const [selectedVersion, setSelectedVersion] = useState("");
   const [editableContent, setEditableContent] = useState("");
 
+  const [documentation, setDocumentation] = useState("");
+  const [processedData, setProcessedData] = useState(null);
+
   const handleGenerateDocs = async () => {
     if (!githubLink.trim()) return;
     setChatMessages([]);
     setIsProcessing(true);
+    setDocumentation("");
 
     try {
       const response = await fetch("http://localhost:5000/generate-docs", {
