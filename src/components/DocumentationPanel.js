@@ -7,6 +7,8 @@ import html2canvas from "html2canvas";
 import { FaCopy, FaCheck, FaDownload, FaEdit, FaEye } from "react-icons/fa";
 import ReactMarkdown from "react-markdown";
 import "./DocumentationPanel.css";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 const DocumentationPanel = ({ documentation, setDocumentation, branches }) => {
   const [copied, setCopied] = useState(false);
@@ -108,13 +110,35 @@ const DocumentationPanel = ({ documentation, setDocumentation, branches }) => {
     <div className={`documentation-panel ${isLoadingSetup ? "blurred" : ""}`}>
 
 {showSetup ? (
-          <div className="full-panel-popup">
-            <div className="popup-header">
+          <div>
+            <div className="doc-header">
               <h2>Setup Guide</h2>
               <button className="close-btn" onClick={() => setShowSetup(false)}>❌</button>
             </div>
-            <div className="popup-body">
-              <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+            <div className="doc-content">
+            <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  code({ node, inline, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    return !inline ? (
+                      <SyntaxHighlighter
+                        style={oneDark}
+                        language={match?.[1] || 'bash'}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  }
+                }}
+              >
                 {setupContent}
               </ReactMarkdown>
             </div>

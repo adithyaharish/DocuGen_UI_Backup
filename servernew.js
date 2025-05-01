@@ -21,6 +21,39 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ML_API_URL = "https://docgen-arm.onrender.com/default-doc";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
+
+const groups = {
+  "SE-UI/src": [
+    "main.ts",
+    "server.ts",
+    "main.server.ts"
+  ],
+  "SE-UI/src/app": [
+    "app.config.server.ts",
+    "app.module.ts",
+    "app.config.ts",
+    "backend.service.spec.ts",
+    "app.component.spec.ts",
+    "app.component.ts",
+    "backend.service.ts"
+  ],
+  "SE-UI/src/app/analysis": [
+    "analysis.component.ts"
+  ],
+  "SE-UI/src/app/input": [
+    "input.component.ts",
+    "input.component.spec.ts"
+  ],
+  "SE-UI/src/app/my-dialog": [
+    "my-dialog.component.ts",
+    "my-dialog.component.spec.ts"
+  ],
+  "root": [
+    "LLM_Analysis.py",
+    "app.py"
+  ]
+}
+
 // Generate documentation endpoint
 app.post('/generate-docs', async (req, res) => {
 
@@ -77,6 +110,7 @@ app.post('/generate-docs', async (req, res) => {
   //     });
   //   }
 
+  //   const groups = mlData.groups;
   //   // Create summary content
   //   const summaryContent = mlData.summaries.map(item =>
   //     `File: ${item.file}\nSummary: ${item.summary}`
@@ -171,9 +205,6 @@ The user has asked: "${userMessage}"
 Your goal is to show *only what's new or improved* based on the user's question.
 `;
 
-
-
-
     console.log("Generated chat prompt:", prompt);
 
     const gptResponse = await axios.post(GPT_API_URL, {
@@ -220,20 +251,34 @@ app.post('/setup-guide', async (req, res) => {
     }
 
     const prompt = `
+You are a technical assistant helping to generate a comprehensive Setup Guide for a software project.
 
-The following documentation has been generated:
-
+Here is the project documentation summary:
 ${documentation}
 
-Now create a **Setup Guide** for this project that includes:
-1. Prerequisites
-2. Installation Instructions
-3. Configuration (if any)
-4. Running the Project
-5. Common Errors & Fixes
-Format your output in markdown. Be clear and helpful.
+Here is the list of files grouped by folders:
+${JSON.stringify(groups, null, 2)}
 
+Please generate in **Markdown format** with the following sections (no extra headings):
+
+1. **Prerequisites**
+2. **Installation Steps**
+3. **Running the App**
+4. **Folder Structure**
+5. **Requirements File**
+
+💡 **Important formatting instructions**:
+- Use Markdown **fenced code blocks** with triple backticks (\`\`\`) for all:
+  - Shell commands (label as \`\`\`bash)
+  - Python scripts (\`\`\`python)
+  - Configuration or package files like \`requirements.txt\`
+- Do **not** use inline backticks for full command blocks
+- Do **not** include extra prose outside the Markdown
+
+Return only the full Markdown output.
 `;
+
+    
     const gptResponse = await axios.post(GPT_API_URL, {
       model: "gpt-4",
       messages: [
@@ -263,6 +308,7 @@ Format your output in markdown. Be clear and helpful.
 
     });
   }
+
 });
 
 
