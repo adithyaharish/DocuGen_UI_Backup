@@ -76,6 +76,7 @@ body {
 
 .main-panel {
   flex: 1;
+  overflow: auto;
   min-height: 400px;
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
@@ -85,7 +86,7 @@ body {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 
@@ -117,10 +118,97 @@ body {
   line-height: var(--line-height);
 }
 
+/* zeel */
+.chat-slide-wrapper {
+  overflow: hidden;
+  transition: max-height 0.4s ease, opacity 0.3s ease;
+  max-height: 600px;
+  opacity: 1;
+}
+
+.chat-slide-wrapper.closed {
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chat-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.version-dropdown-wrapper {
+  margin-bottom: 1rem;
+}
+
+.version-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: #fff;
+  overflow: hidden;
+}
+
+.version-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.version-item:last-child {
+  border-bottom: none;
+}
+
+.version-item:hover {
+  background-color: #f3f4f6;
+}
+
+.version-label {
+  flex: 1;
+  font-size: 0.95rem;
+}
+
+.version-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.version-item:hover .version-actions {
+  opacity: 1;
+}
+
+.rename-icon,
+.delete-icon {
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.rename-icon:hover {
+  color: #0366d6;
+}
+
+.delete-icon:hover {
+  color: red;
+}
+
+.version-item.active .version-label {
+  font-weight: bold;
+  color: var(--primary-color);
+}
 
 
 
-
+/* zeel ends */
 
 /* Left Panel Styling */
 .sidebar {
@@ -229,7 +317,34 @@ body {
   background-color: #fff;
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  max-height: none; /* Show more content */
 }
+
+
+/*zeel again*/
+.main-panel select,
+.button-group {
+  margin-bottom: 0.5rem;
+}
+
+
+.documentation-panel h2 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.3rem;
+}
+
+.doc-container.full-height .documentation-panel {
+  min-height: 60vh;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* zeel ends*/
+
+
+
+
 
 /* Container for chat messages */
 .chat-messages {

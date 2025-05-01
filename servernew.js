@@ -5,7 +5,7 @@ const axios = require('axios');
 const morgan = require('morgan');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = 5000;
 
 // Middleware
 app.use(cors());
@@ -13,8 +13,8 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Environment variables
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const ML_API_URL = process.env.ML_API_URL || "https://docgen-arm.onrender.com/default-doc";
+const OPENAI_API_KEY = "";
+const ML_API_URL = "https://docgen-arm.onrender.com/default-doc";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 
 // Generate documentation endpoint
@@ -143,7 +143,21 @@ app.post('/chat', async (req, res) => {
             return res.status(400).json({ error: "Missing userMessage or documentation parameter" });
         }
 
-        const prompt = `The current documentation is:\n${documentation}\n\nThe user has provided the following feedback to refine it:\n${userMessage}\n\nPlease provide the updated/refined documentation based on the above.`;
+        const prompt = `
+You are reviewing this software documentation:
+
+${documentation}
+
+The user has asked: "${userMessage}"
+
+✅ Instead of rewriting everything, return ONLY the changes, clarifications, or additions needed.
+✅ Use bullet points or markdown sections like "### Revised: get_analysis".
+❌ DO NOT repeat unchanged parts.
+Your goal is to show *only what's new or improved* based on the user's question.
+`;
+
+
+
 
         console.log("Generated chat prompt:", prompt);
 
@@ -192,7 +206,26 @@ function createExpertPrompt(summaryContent) {
     return `You are tasked with providing an *expert-level documentation summary* for the following data:\n${summaryContent}\n\nThe user is an expert, so the explanation should be brief, highly technical, and focused on advanced topics.\n\nHere's how the documentation should be structured:\n\n### 1. *Internals Deep Dive*\nExplain the system's internals, including key algorithms and design decisions.\n\n### 2. *Extending the Project*\nDescribe how to extend the system with custom plugins or features.\n\n### 3. *Contributing Guide*\nProvide guidelines for contributing to the project.\n\n### 4. *Advanced Customization*\nDetail how to customize core functionality.\n\n### 5. *Security Considerations*\nDiscuss security best practices and risk mitigation.\n\n### 6. *Benchmarks and Optimization*\nProvide performance benchmarks and optimization tips.\n\n### 7. *Design Decisions*\nExplain key architectural decisions.\n\n### 8. *Edge Cases*\nDiscuss handling of edge cases and rare scenarios.`;
 }
 
-// Error handler
+// // Error handler
+// app.use((err, req, res, next) => {
+//     console.error(err.stack);
+//     res.status(500).json({ error: 'Something broke!' });
+// });
+
+// app.listen(PORT, () => {
+//     console.log(`Server running on port ${PORT}`);
+// });
+
+// const path = require('path');
+// app.use(express.static(path.join(__dirname, 'build')));
+
+// app.get(/(.*)/, (req, res) => {
+//     res.sendFile(path.join(__dirname, 'build', 'index.html'));
+//   });
+
+
+
+  // Error handler
 app.use((err, req, res, next) => {
     console.error(err.stack);
     res.status(500).json({ error: 'Something broke!' });
@@ -201,12 +234,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
-
-const path = require('path');
-app.use(express.static(path.join(__dirname, 'build')));
-
-app.get(/(.*)/, (req, res) => {
-    res.sendFile(path.join(__dirname, 'build', 'index.html'));
-  });
   
 

@@ -19,6 +19,9 @@
   background-color: #fff;
   border: 1px solid var(--border-color);
   border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 
@@ -183,10 +186,13 @@
   font-size: 1rem;
   line-height: 1.6;
   color: var(--text-primary);
-  max-height: 400px; /* Adjust the height as needed */
   overflow-y: auto; /* Enables vertical scrolling when content overflows */
   padding: 1rem;
   border: 1px solid var(--border-color); /* Optional border for clarity */
   background-color: #fff; /* Optional background color */
+  flex-grow: 1;
+  overflow-y: auto;
+  min-height: 50vh;
+  max-height: unset;
 }
 
