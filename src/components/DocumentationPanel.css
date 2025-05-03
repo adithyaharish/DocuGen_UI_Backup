@@ -245,3 +245,21 @@
   max-height: unset;
 }
 
+
+.clickable-term {
+  border-bottom: 1px dotted orange;
+  color: maroon;
+  cursor: pointer;
+}
+
+/* translucent background while a TermPopup is open */
+.popup-overlay-lite {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(2px);
+  z-index: 999;
+}
+
+
+

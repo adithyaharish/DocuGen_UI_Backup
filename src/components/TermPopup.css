@@ -1,0 +1,113 @@
+/* ─────────── backdrop ─────────── */
+.popup-overlay-lite {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);    /* lighter blur */
+    backdrop-filter: blur(2px);
+    z-index: 999;
+  }
+  
+  /* ─────────── card ─────────── */
+  .term-popup {
+    position: absolute;
+    width: 600px;                       /* a bit wider */
+    max-width: 92vw;
+    background: #fff;
+    padding: 1.2rem 1.5rem 1rem;
+    border-radius: 10px;
+    border-top: 6px solid maroon;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.25);
+    z-index: 1000;
+    animation: popIn .18s ease-out;
+    height: 500px;       /* ← pick your fixed height */
+    overflow: hidden; 
+  }
+  
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.94); }
+    to   { opacity: 1; transform: scale(1);   }
+  }
+  
+  .term-popup h4 {
+    margin: 0 0 0.6rem;
+    color: maroon;
+    font-weight: 600;
+    font-size: 1.15rem;
+  }
+  
+  .term-body {
+    margin: 0 0 0.8rem;
+    font-size: 0.93rem;
+    line-height: 1.4;
+    height: calc(100% -  /* header */ 2.2rem 
+    - /* buttons */ 2.5rem 
+    - /* chat row */ 2.5rem);
+    overflow-y: auto;    /* enable vertical scrolling */
+  }
+  
+  /* ─────────── 3 buttons on one line ─────────── */
+  .popup-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+  }
+  
+  .popup-buttons button {
+    flex: 1;
+    background: maroon;
+    color: #fff;
+    border: none;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.25s;
+  }
+  
+  .popup-buttons button:hover:not(:disabled) { background: #540808; }
+  .popup-buttons button:disabled            { opacity: 0.6; cursor: default; }
+  
+  /* ─────────── follow-up chat row ─────────── */
+  .popup-chat {
+    display: flex;
+    gap: 0.4rem;
+  }
+  
+  .popup-chat input {
+    flex: 1;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.85rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  
+  .send-icon {
+    background: maroon;
+    border: none;
+    color: #fff;
+    padding: 0.45rem 0.6rem;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .send-icon:disabled { opacity: 0.6; cursor: default; }
+  
+  /* ─────────── close (×) ─────────── */
+  .close-btn {
+    background: transparent;
+    border: none;
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    cursor: pointer;
+    color: #666;
+  }
+  .close-btn:hover { color: #000; }
+  
+
+
+
+
+
