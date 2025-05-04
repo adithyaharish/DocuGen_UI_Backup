@@ -3,7 +3,6 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const morgan = require('morgan');
-
 const app = express();
 const PORT = 5000;
 
@@ -20,162 +19,162 @@ app.use(morgan('dev'));
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ML_API_URL = "https://docgen-arm.onrender.com/default-doc";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
+let groups = {}; 
 
-
-const groups = {
-  "SE-UI/src": [
-    "main.ts",
-    "server.ts",
-    "main.server.ts"
-  ],
-  "SE-UI/src/app": [
-    "app.config.server.ts",
-    "app.module.ts",
-    "app.config.ts",
-    "backend.service.spec.ts",
-    "app.component.spec.ts",
-    "app.component.ts",
-    "backend.service.ts"
-  ],
-  "SE-UI/src/app/analysis": [
-    "analysis.component.ts"
-  ],
-  "SE-UI/src/app/input": [
-    "input.component.ts",
-    "input.component.spec.ts"
-  ],
-  "SE-UI/src/app/my-dialog": [
-    "my-dialog.component.ts",
-    "my-dialog.component.spec.ts"
-  ],
-  "root": [
-    "LLM_Analysis.py",
-    "app.py"
-  ]
-}
+// const groups = {
+//   "SE-UI/src": [
+//     "main.ts",
+//     "server.ts",
+//     "main.server.ts"
+//   ],
+//   "SE-UI/src/app": [
+//     "app.config.server.ts",
+//     "app.module.ts",
+//     "app.config.ts",
+//     "backend.service.spec.ts",
+//     "app.component.spec.ts",
+//     "app.component.ts",
+//     "backend.service.ts"
+//   ],
+//   "SE-UI/src/app/analysis": [
+//     "analysis.component.ts"
+//   ],
+//   "SE-UI/src/app/input": [
+//     "input.component.ts",
+//     "input.component.spec.ts"
+//   ],
+//   "SE-UI/src/app/my-dialog": [
+//     "my-dialog.component.ts",
+//     "my-dialog.component.spec.ts"
+//   ],
+//   "root": [
+//     "LLM_Analysis.py",
+//     "app.py"
+//   ]
+// }
 
 // Generate documentation endpoint
 app.post('/generate-docs', async (req, res) => {
 
-  const guidePath = path.join(__dirname, 'dummy_output.md');
-  const guideText = fs.readFileSync(guidePath, 'utf-8');
+  // const guidePath = path.join(__dirname, 'dummy_output.md');
+  // const guideText = fs.readFileSync(guidePath, 'utf-8');
 
-  res.json({
-      gpt_summary: guideText ,
-      branches:[]
-  });
+  // res.json({
+  //     gpt_summary: guideText ,
+  //     branches:[]
+  // });
 
 
-  // try {
-  //   console.log("Received request to /generate-docs");
-  //   const { githubLink, persona, branch } = req.body;
+  try {
+    console.log("Received request to /generate-docs");
+    const { githubLink, persona, branch } = req.body;
 
-  //   console.log("Request body:", req.body);
+    console.log("Request body:", req.body);
 
-  //   // Validate input
-  //   if (!githubLink || !persona) {
-  //     console.log("Missing githubLink or persona parameter");
-  //     return res.status(400).json({ error: "Missing githubLink or persona parameter" });
-  //   }
+    // Validate input
+    if (!githubLink || !persona) {
+      console.log("Missing githubLink or persona parameter");
+      return res.status(400).json({ error: "Missing githubLink or persona parameter" });
+    }
 
-  //   // Call ML API
-  //   let mlResponse;
-  //   try {
-  //     console.log(`Calling ML API at ${ML_API_URL}`);
-  //     mlResponse = await axios.post(ML_API_URL, {
-  //       repo_url: githubLink,
-  //       branch: branch
-  //     }, {
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //         'Accept': 'application/json'
-  //       }
-  //     });
-  //     console.log("ML API Response:", mlResponse.data);
-  //   } catch (error) {
-  //     console.error("ML API Connection Failed:", error);
-  //     return res.status(502).json({
-  //       error: "Connection to documentation service failed",
-  //       details: error.message
-  //     });
-  //   }
+    // Call ML API
+    let mlResponse;
+    try {
+      console.log(`Calling ML API at ${ML_API_URL}`);
+      mlResponse = await axios.post(ML_API_URL, {
+        repo_url: githubLink,
+        branch: branch
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      console.log("ML API Response:", mlResponse.data);
+    } catch (error) {
+      console.error("ML API Connection Failed:", error);
+      return res.status(502).json({
+        error: "Connection to documentation service failed",
+        details: error.message
+      });
+    }
 
-  //   // Process ML API response
-  //   const mlData = mlResponse.data;
-  //   if (!mlData.summaries) {
-  //     console.log("Invalid documentation service response: Missing summaries");
-  //     return res.status(502).json({
-  //       error: "Invalid documentation service response",
-  //       details: "Missing required field: summaries"
-  //     });
-  //   }
+    // Process ML API response
+    const mlData = mlResponse.data;
+    if (!mlData.summaries) {
+      console.log("Invalid documentation service response: Missing summaries");
+      return res.status(502).json({
+        error: "Invalid documentation service response",
+        details: "Missing required field: summaries"
+      });
+    }
 
-  //   const groups = mlData.groups;
-  //   // Create summary content
-  //   const summaryContent = mlData.summaries.map(item =>
-  //     `File: ${item.file}\nSummary: ${item.summary}`
-  //   ).join('\n\n');
+    groups = mlData.groups;
+    // Create summary content
+    const summaryContent = mlData.summaries.map(item =>
+      `File: ${item.file}\nSummary: ${item.summary}`
+    ).join('\n\n');
 
-  //   // Create persona-specific prompt
-  //   let textPrompt;
-  //   switch (persona.toLowerCase()) {
-  //     case 'beginner':
-  //       textPrompt = createBeginnerPrompt(summaryContent);
-  //       break;
-  //     case 'intermediate':
-  //       textPrompt = createIntermediatePrompt(summaryContent);
-  //       break;
-  //     case 'expert':
-  //       textPrompt = createExpertPrompt(summaryContent);
-  //       break;
-  //     default:
-  //       console.log("Invalid persona specified");
-  //       return res.status(400).json({ error: "Invalid persona specified" });
-  //   }
+    // Create persona-specific prompt
+    let textPrompt;
+    switch (persona.toLowerCase()) {
+      case 'beginner':
+        textPrompt = createBeginnerPrompt(summaryContent);
+        break;
+      case 'intermediate':
+        textPrompt = createIntermediatePrompt(summaryContent);
+        break;
+      case 'expert':
+        textPrompt = createExpertPrompt(summaryContent);
+        break;
+      default:
+        console.log("Invalid persona specified");
+        return res.status(400).json({ error: "Invalid persona specified" });
+    }
 
-  //   console.log("Generated text prompt:", textPrompt);
+    console.log("Generated text prompt:", textPrompt);
 
-  //   // Call OpenAI API
-  //   let gptResponse;
-  //   try {
-  //     console.log(`Calling GPT API at ${GPT_API_URL}`);
-  //     gptResponse = await axios.post(GPT_API_URL, {
-  //       model: "gpt-4",
-  //       messages: [
-  //         { role: "system", content: "You are a helpful assistant." },
-  //         { role: "user", content: textPrompt }
-  //       ],
-  //       temperature: 0.7
-  //     }, {
-  //       headers: {
-  //         'Authorization': `Bearer ${OPENAI_API_KEY}`,
-  //         'Content-Type': 'application/json'
-  //       }
-  //     });
-  //     console.log("GPT API Response:", gptResponse.data);
-  //   } catch (error) {
-  //     console.error("GPT API Connection Failed:", error);
-  //     return res.status(502).json({
-  //       error: "Connection to GPT service failed",
-  //       details: error.message
-  //     });
-  //   }
+    // Call OpenAI API
+    let gptResponse;
+    try {
+      console.log(`Calling GPT API at ${GPT_API_URL}`);
+      gptResponse = await axios.post(GPT_API_URL, {
+        model: "gpt-4",
+        messages: [
+          { role: "system", content: "You are a helpful assistant." },
+          { role: "user", content: textPrompt }
+        ],
+        temperature: 0.7
+      }, {
+        headers: {
+          'Authorization': `Bearer ${OPENAI_API_KEY}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      console.log("GPT API Response:", gptResponse.data);
+    } catch (error) {
+      console.error("GPT API Connection Failed:", error);
+      return res.status(502).json({
+        error: "Connection to GPT service failed",
+        details: error.message
+      });
+    }
 
-  //   const gpt_summary = gptResponse.data.choices[0].message.content;
+    const gpt_summary = gptResponse.data.choices[0].message.content;
 
-  //   console.log("Generated GPT Summary:", gpt_summary);
-  //   res.json({
-  //     gpt_summary: gpt_summary,
-  //     branches: mlData.branches || []
-  //   });
+    console.log("Generated GPT Summary:", gpt_summary);
+    res.json({
+      gpt_summary: gpt_summary,
+      branches: mlData.branches || []
+    });
 
-  // } catch (error) {
-  //   console.error("Unexpected error:", error);
-  //   res.status(500).json({
-  //     error: "Internal server error",
-  //     details: error.message
-  //   });
-  // }
+  } catch (error) {
+    console.error("Unexpected error:", error);
+    res.status(500).json({
+      error: "Internal server error",
+      details: error.message
+    });
+  }
   
 });
 
@@ -459,3 +458,52 @@ Explain what **${term}** is (purpose, params/return if applicable, one-sentence 
         .json({ error: "Term‑chat failed — could not reach the language model" });
     }
   });
+
+
+
+
+app.post("/compare-branches", async (req, res) => {
+  const { githubUrl, base, head, githubToken } = req.body;
+
+  if (!githubUrl || !base || !head) {
+    return res.status(400).json({ error: "Missing githubUrl, base, or head" });
+  }
+
+  try {
+    const match = githubUrl.match(/github\.com\/([^/]+)\/([^/]+)(\.git)?$/);
+    if (!match) {
+      return res.status(400).json({ error: "Invalid GitHub URL" });
+    }
+
+    const owner = match[1];
+    const repo = match[2];
+    const compareUrl = `https://api.github.com/repos/${owner}/${repo}/compare/${base}...${head}`;
+
+    console.log(owner, repo, base, head);
+    
+    const headers = githubToken
+      ? { Authorization: `Bearer ${githubToken}` }
+      : {};
+
+    const response = await axios.get(compareUrl, { headers });
+
+    const files = response.data.files.map((file) => ({
+      filename: file.filename,
+      status: file.status,
+      additions: file.additions,
+      deletions: file.deletions,
+      changes: file.changes,
+      patch: file.patch || null,
+      blob_url: file.blob_url
+    }));
+    
+
+    res.json({ files });
+  } catch (error) {
+    console.error("Compare error:", error.message);
+    res.status(500).json({
+      error: "Failed to compare branches",
+      details: error.message
+    });
+  }
+});

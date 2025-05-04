@@ -7,6 +7,8 @@ import DocumentationPanel from "./components/DocumentationPanel";
 import DocDiffViewer from "./components/DocDiffViewer";
 import "./App.css";
 import logo from "./assets/logo.png";
+import BranchCompareUI from "./components/BranchCompareUI";
+
 
 function App() {
   const [githubLink, setGithubLink] = useState("");
@@ -25,6 +27,11 @@ function App() {
 
   const [documentation, setDocumentation] = useState("");
   const [processedData, setProcessedData] = useState(null);
+
+  const [baseBranch, setBaseBranch] = useState("");
+  const [targetBranch, setTargetBranch] = useState("");
+const [showBranchCompare, setShowBranchCompare] = useState(false);
+
 
   const handleGenerateDocs = async () => {
     if (!githubLink.trim()) return;
@@ -178,124 +185,165 @@ function App() {
           >
             {isProcessing ? "Generating..." : "Generate Docs"}
           </button>
+
+          <div className="compare-branches-block">
+            <label>Base Branch:</label>
+            <select value={baseBranch} onChange={(e) => setBaseBranch(e.target.value)}>
+              <option value="">Select</option>
+              {branches.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
+
+            <label>Target Branch:</label>
+            <select value={targetBranch} onChange={(e) => setTargetBranch(e.target.value)}>
+              <option value="">Select</option>
+              {branches.map((b) => (
+                <option key={b} value={b}>{b}</option>
+              ))}
+            </select>
+
+            <button
+              className="generate-docs-btn"
+              disabled={!baseBranch || !targetBranch}
+              onClick={() => setShowBranchCompare(true)}
+            >
+              Compare
+            </button>
+          </div>
         </aside>
 
         <main className="main-panel">
           {isProcessing && <ProcessingIndicator />}
 
-          {!isProcessing && Object.keys(docVersions).length > 0 && (
+          {showBranchCompare ? (
+            <BranchCompareUI
+              baseBranch={baseBranch}
+              targetBranch={targetBranch}
+              githubLink={githubLink}
+              onClose={() => setShowBranchCompare(false)}
+            />
+          ) : (
             <>
-              <div className="version-dropdown-wrapper">
-                <label htmlFor="version-select"><strong>View Version:</strong></label>{" "}
-                <select
-                  id="version-select"
-                  value={selectedVersion}
-                  onChange={(e) => handleVersionChange(e.target.value)}
-                  style={{ marginTop: "0.5rem", padding: "0.4rem", borderRadius: "4px" }}
-                >
-                  {Object.entries(docVersions).map(([versionName, { label }]) => (
-                    <option key={versionName} value={versionName}>
-                      {versionName} – {label}
-                    </option>
-                  ))}
-                </select>
 
-                {selectedVersion !== "Original" && (
-                  <div style={{ marginTop: "0.5rem", display: "flex", gap: "1rem" }}>
-                    <button
-                      onClick={() => {
-                        const newLabel = prompt("✏️ Rename this version:");
-                        if (newLabel?.trim()) {
+              {!isProcessing && Object.keys(docVersions).length > 0 && (
+                <>
+                  <div className="version-dropdown-wrapper">
+                    <label htmlFor="version-select"><strong>View Version:</strong></label>{" "}
+                    <select
+                      id="version-select"
+                      value={selectedVersion}
+                      onChange={(e) => handleVersionChange(e.target.value)}
+                      style={{ marginTop: "0.5rem", padding: "0.4rem", borderRadius: "4px" }}
+                    >
+                      {Object.entries(docVersions).map(([versionName, { label }]) => (
+                        <option key={versionName} value={versionName}>
+                          {versionName} – {label}
+                        </option>
+                      ))}
+                    </select>
+
+                    {selectedVersion !== "Original" && (
+                      <div style={{ marginTop: "0.5rem", display: "flex", gap: "1rem" }}>
+                        <button
+                          onClick={() => {
+                            const newLabel = prompt("✏️ Rename this version:");
+                            if (newLabel?.trim()) {
+                              setDocVersions((prev) => ({
+                                ...prev,
+                                [selectedVersion]: {
+                                  ...prev[selectedVersion],
+                                  label: newLabel.trim(),
+                                },
+                              }));
+                            }
+                          }}
+                        >
+                          ✏️ Rename
+                        </button>
+                        <button
+                          onClick={() => {
+                            const confirmed = window.confirm(`Delete "${selectedVersion}"?`);
+                            if (confirmed) {
+                              setDocVersions((prev) => {
+                                const updated = { ...prev };
+                                delete updated[selectedVersion];
+                                const fallback = Object.keys(updated)[0] || "";
+                                setSelectedVersion(fallback);
+                                return updated;
+                              });
+                            }
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
+                        <button
+                          onClick={() => setShowDiff((prev) => !prev)}
+                          style={{ backgroundColor: "#f0f0f0" }}
+                        >
+                          {showDiff ? "Hide Diff" : "Compare with Original"}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {showDiff && selectedVersion !== "Original" ? (
+                    <DocDiffViewer
+                      original={docVersions["Original"].content}
+                      edited={docVersions[selectedVersion].content}
+                    />
+                  ) : (
+                    <div className={`doc-container ${!showChat ? "full-height" : ""}`}>
+
+
+                      <DocumentationPanel
+                        documentation={editableContent}
+                        setDocumentation={(newContent) => {
+                          setEditableContent(newContent);
                           setDocVersions((prev) => ({
                             ...prev,
                             [selectedVersion]: {
                               ...prev[selectedVersion],
-                              label: newLabel.trim(),
+                              content: newContent,
                             },
                           }));
-                        }
-                      }}
-                    >
-                      ✏️ Rename
-                    </button>
-                    <button
-                      onClick={() => {
-                        const confirmed = window.confirm(`Delete "${selectedVersion}"?`);
-                        if (confirmed) {
-                          setDocVersions((prev) => {
-                            const updated = { ...prev };
-                            delete updated[selectedVersion];
-                            const fallback = Object.keys(updated)[0] || "";
-                            setSelectedVersion(fallback);
-                            return updated;
-                          });
-                        }
-                      }}
-                    >
-                      🗑️ Delete
-                    </button>
-                    <button
-                      onClick={() => setShowDiff((prev) => !prev)}
-                      style={{ backgroundColor: "#f0f0f0" }}
-                    >
-                      {showDiff ? "Hide Diff" : "Compare with Original"}
-                    </button>
-                  </div>
-                )}
-              </div>
+                        }}
+                      />
 
-              {showDiff && selectedVersion !== "Original" ? (
-                <DocDiffViewer
-                  original={docVersions["Original"].content}
-                  edited={docVersions[selectedVersion].content}
-                />
-              ) : (
-                <div className={`doc-container ${!showChat ? "full-height" : ""}`}>
-                  <DocumentationPanel
-                    documentation={editableContent}
-                    setDocumentation={(newContent) => {
-                      setEditableContent(newContent);
-                      setDocVersions((prev) => ({
-                        ...prev,
-                        [selectedVersion]: {
-                          ...prev[selectedVersion],
-                          content: newContent,
-                        },
-                      }));
+                    </div>
+                  )}
+
+                  <div className={`chat-slide-wrapper ${showChat ? "open" : "closed"}`}>
+                    <ChatInterface
+                      messages={chatMessages}
+                      onChatSubmit={handleChatSubmit}
+                      chatLoading={isChatLoading}
+                    />
+                  </div>
+
+                  <button
+                    onClick={() => setShowChat(!showChat)}
+                    style={{
+                      margin: "1rem 0",
+                      padding: "0.4rem 1rem",
+                      background: "#e2e2e2",
+                      border: "1px solid #ccc",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontWeight: "500",
                     }}
-                  />
-                </div>
+                  >
+                    {showChat ? "Hide Chat" : "Show Chat"}
+                  </button>
+                </>
               )}
 
-              <div className={`chat-slide-wrapper ${showChat ? "open" : "closed"}`}>
-                <ChatInterface
-                  messages={chatMessages}
-                  onChatSubmit={handleChatSubmit}
-                  chatLoading={isChatLoading}
-                />
-              </div>
-
-              <button
-                onClick={() => setShowChat(!showChat)}
-                style={{
-                  margin: "1rem 0",
-                  padding: "0.4rem 1rem",
-                  background: "#e2e2e2",
-                  border: "1px solid #ccc",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  fontWeight: "500",
-                }}
-              >
-                {showChat ? "Hide Chat" : "Show Chat"}
-              </button>
+              {!isProcessing && Object.keys(docVersions).length === 0 && (
+                <div className="placeholder">
+                  <p>Enter your GitHub link and select your persona to generate documentation.</p>
+                </div>
+              )}
             </>
-          )}
-
-          {!isProcessing && Object.keys(docVersions).length === 0 && (
-            <div className="placeholder">
-              <p>Enter your GitHub link and select your persona to generate documentation.</p>
-            </div>
           )}
         </main>
       </div>
