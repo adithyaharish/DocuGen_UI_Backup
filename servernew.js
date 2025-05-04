@@ -275,7 +275,11 @@ Please generate in **Markdown format** with the following sections (no extra hea
 - Do **not** use inline backticks for full command blocks
 - Do **not** include extra prose outside the Markdown
 
-Return only the full Markdown output.
+Format all shell commands, code snippets, and config files using Markdown fenced code blocks with triple backticks
+
+Do not wrap the entire guide in a code block — use normal Markdown formatting for everything else.
+Return only the resulting Markdown. 
+
 `;
 
     
