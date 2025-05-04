@@ -361,3 +361,101 @@ app.listen(PORT, () => {
 });
 
 
+/* ───────── term-info (first blurb) ───────── */
+app.post("/term-info", async (req, res) => {
+  const { term, snippet } = req.body;          //  <-- include snippet!
+  if (!term || !snippet)
+    return res.status(400).json({ error: "term & snippet are required" });
+
+  const prompt = `
+Term snippet:
+"""
+${snippet}
+"""
+
+Explain what **${term}** is (purpose, params/return if applicable, one-sentence usage).`;
+
+  const gpt = await axios.post(
+    GPT_API_URL,
+    {
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: "You are a concise senior dev." },
+        { role: "user", content: prompt.trim() },
+      ],
+      temperature: 0.4,
+    },
+    { headers: { Authorization: `Bearer ${OPENAI_API_KEY}` } }
+  );
+
+  res.json({ answer: gpt.data.choices[0].message.content.trim() });
+});
+
+
+/* ────────────────────────────────────────────────────────────
+   /term-chat  ‑  follow‑up Q&A inside the TermPopup
+   ──────────────────────────────────────────────────────────── */
+   app.post("/term-chat", async (req, res) => {
+    try {
+      const { term, snippet, history } = req.body;
+  
+      // Basic validation ― stop early if something is missing
+      if (!term || !snippet || !Array.isArray(history)) {
+        return res
+          .status(400)
+          .json({ error: "term, snippet & history are all required" });
+      }
+  
+      /* Build the message array
+         history looks like:
+         [
+           { role: "assistant", content: "First answer" },
+           { role: "user",      content: "Follow‑up question" }
+         ]
+      */
+      const messages = [
+        {
+          role: "system",
+          content:
+            "You are a concise senior developer. Answer strictly as Markdown unless asked otherwise.",
+        },
+        {
+          role: "user",
+          content: `Context snippet for the term **${term}**:\n"""${snippet}"""`,
+        },
+        ...history, // alternate assistant / user turns
+      ];
+  
+
+    
+      const completion = await axios.post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-4o-mini", // or "gpt-4" if you prefer
+          messages,
+          temperature: 0.4,
+          max_tokens: 512,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          },
+        }
+      );
+  
+      // Extract & trim the answer; bail if it came back empty
+      const answer =
+        completion.data.choices?.[0]?.message?.content?.trim() ?? null;
+  
+      if (!answer) {
+        return res.status(502).json({ error: "LLM returned an empty response" });
+      }
+  
+      res.json({ answer });
+    } catch (err) {
+      console.error("term-chat error:", err.response?.data || err.message);
+      res
+        .status(502)
+        .json({ error: "Term‑chat failed — could not reach the language model" });
+    }
+  });
