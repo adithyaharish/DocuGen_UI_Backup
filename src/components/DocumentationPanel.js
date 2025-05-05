@@ -151,7 +151,7 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
   const handleSetupGuide = async () => {
     setIsLoadingSetup(true);
     try {
-      const response = await fetch("http://localhost:5000/setup-guide", {
+      const response = await fetch("/setup-guide", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ documentation })
@@ -243,7 +243,7 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
                     </button>
                     {isOpen && (
                       <div className="dropdown-menu">
-                        <button onClick={() => { exportText("pdf"); setIsOpen(false); }}>📄 PDF</button>
+                        <button onClick={downloadPDF}>📄 PDF</button>
                         <button onClick={() => { exportText("txt"); setIsOpen(false); }}>📄 TXT</button>
                         <button onClick={() => { exportText("json"); setIsOpen(false); }}>📄 JSON</button>
                       </div>
@@ -275,7 +275,7 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
 
                     setIsTranslating(true);
                     try {
-                      const response = await fetch("http://localhost:5000/translate", {
+                      const response = await fetch("/translate", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ text: originalDoc, targetLang: newLang }) // 👈 always translate from original

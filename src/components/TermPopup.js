@@ -17,7 +17,7 @@ export default function TermPopup({ term, position, onClose, snippet }) {
     let cancel = false;
     (async () => {
       try {
-        const res = await fetch("http://localhost:5000/term-info", {
+        const res = await fetch("/term-info", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -53,7 +53,7 @@ export default function TermPopup({ term, position, onClose, snippet }) {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/term-chat", {
+      const res = await fetch("/term-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

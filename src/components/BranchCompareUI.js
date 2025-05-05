@@ -9,7 +9,7 @@ export default function BranchCompareUI({ baseBranch, targetBranch, githubLink, 
   useEffect(() => {
     const fetchComparison = async () => {
       try {
-        const response = await fetch("http://localhost:5000/compare-branches", {
+        const response = await fetch("/compare-branches", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({

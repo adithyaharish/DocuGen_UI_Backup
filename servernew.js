@@ -94,12 +94,12 @@ app.post('/generate-docs', async (req, res) => {
     try {
       console.log(`Calling GPT API at ${GPT_API_URL}`);
       gptResponse = await axios.post(GPT_API_URL, {
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [
           { role: "system", content: "You are a helpful assistant." },
           { role: "user", content: textPrompt }
         ],
-        temperature: 0.7
+        temperature: 0.5
       }, {
         headers: {
           'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -162,12 +162,12 @@ Your goal is to show *only what's new or improved* based on the user's question.
     console.log("Generated chat prompt:", prompt);
 
     const gptResponse = await axios.post(GPT_API_URL, {
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a helpful assistant." },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7
+      temperature: 0.5
     }, {
       headers: {
         'Authorization': `Bearer ${OPENAI_API_KEY}`,
@@ -236,12 +236,12 @@ Return only the resulting Markdown.
 `;
 
     const gptResponse = await axios.post(GPT_API_URL, {
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a technical documentation assistant." },
         { role: "user", content: prompt }
       ],
-      temperature: 0.7
+      temperature: 0.5
     }, {
 
       headers: {
@@ -280,34 +280,34 @@ function createExpertPrompt(summaryContent) {
   return `You are tasked with providing an *expert-level documentation summary* for the following data:\n${summaryContent}\n\nThe user is an expert, so the explanation should be brief, highly technical, and focused on advanced topics.\n\nHere's how the documentation should be structured:\n\n### 1. *Internals Deep Dive*\nExplain the system's internals, including key algorithms and design decisions.\n\n### 2. *Extending the Project*\nDescribe how to extend the system with custom plugins or features.\n\n### 3. *Contributing Guide*\nProvide guidelines for contributing to the project.\n\n### 4. *Advanced Customization*\nDetail how to customize core functionality.\n\n### 5. *Security Considerations*\nDiscuss security best practices and risk mitigation.\n\n### 6. *Benchmarks and Optimization*\nProvide performance benchmarks and optimization tips.\n\n### 7. *Design Decisions*\nExplain key architectural decisions.\n\n### 8. *Edge Cases*\nDiscuss handling of edge cases and rare scenarios.`;
 }
 
-// // Error handler
-// app.use((err, req, res, next) => {
-//     console.error(err.stack);
-//     res.status(500).json({ error: 'Something broke!' });
-// });
+// Error handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: 'Something broke!' });
+});
 
-// app.listen(PORT, () => {
-//     console.log(`Server running on port ${PORT}`);
-// });
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
 
-// const path = require('path');
-// app.use(express.static(path.join(__dirname, 'build')));
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'build')));
 
-// app.get(/(.*)/, (req, res) => {
-//     res.sendFile(path.join(__dirname, 'build', 'index.html'));
-//   });
+app.get(/(.*)/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+  });
 
 
 
 // Error handler
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Something broke!' });
-});
+// app.use((err, req, res, next) => {
+//   console.error(err.stack);
+//   res.status(500).json({ error: 'Something broke!' });
+// });
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
 
 
 /* ───────── term-info (first blurb) ───────── */
@@ -327,12 +327,12 @@ Explain what **${term}** is (purpose, params/return if applicable, one-sentence 
   const gpt = await axios.post(
     GPT_API_URL,
     {
-      model: "gpt-4o-mini",
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a concise senior dev." },
         { role: "user", content: prompt.trim() },
       ],
-      temperature: 0.4,
+      temperature: 0.5,
     },
     { headers: { Authorization: `Bearer ${OPENAI_API_KEY}` } }
   );
@@ -380,7 +380,7 @@ app.post("/term-chat", async (req, res) => {
     const completion = await axios.post(
       "https://api.openai.com/v1/chat/completions",
       {
-        model: "gpt-4o-mini", // or "gpt-4" if you prefer
+        model: "gpt-3.5-turbo", // or "gpt-4" if you prefer
         messages,
         temperature: 0.4,
         max_tokens: 512,
@@ -482,7 +482,7 @@ ${text}
 
   try {
     const gptResponse = await axios.post(GPT_API_URL, {
-      model: "gpt-4",
+      model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: "You are a professional multilingual technical writer." },
         { role: "user", content: prompt }
