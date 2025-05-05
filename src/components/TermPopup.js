@@ -90,7 +90,17 @@ const sendFollowUp = async (promptText) => {
   return (
     <>
       <div className="popup-overlay-lite" onClick={onClose} />
-      <div className="term-popup" style={{ top: position.top, left: position.left }}>
+      <div
+  className="term-popup"
+  style={{
+    position: "fixed",
+    top: `${position.top}px`,
+    left: `${position.left}px`,
+    margin: "0 auto"
+  }}
+>
+
+      {/* <div className="term-popup" style={{ top: position.top, left: position.left }}> */}
         <button className="close-btn" onClick={onClose}>
           <X size={20} />
         </button>
