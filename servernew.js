@@ -264,7 +264,6 @@ Please generate in **Markdown format** with the following sections (no extra hea
 2. **Installation Steps**
 3. **Running the App**
 4. **Folder Structure**
-5. **Requirements File**
 
 💡 **Important formatting instructions**:
 - Use Markdown **fenced code blocks** with triple backticks (\`\`\`) for all:
@@ -281,7 +280,6 @@ Return only the resulting Markdown.
 
 `;
 
-    
     const gptResponse = await axios.post(GPT_API_URL, {
       model: "gpt-4",
       messages: [
