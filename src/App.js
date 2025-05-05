@@ -162,7 +162,7 @@ const [showBranchCompare, setShowBranchCompare] = useState(false);
   }, [selectedVersion]);
 
   return (
-    <div className={isProcessing ? "app dark-mode" : "app"}>
+    <div className={isProcessing ? "app" : "app"}>
       <header className="app-header">
         <img src={logo} alt="DocuGen Logo" className="logo" />
         <h1>Documentation Generator</h1>
