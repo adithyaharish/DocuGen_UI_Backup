@@ -336,6 +336,25 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
   const [setupContent, setSetupContent] = useState("");
   const [isLoadingSetup, setIsLoadingSetup] = useState(false);
 
+  const LANGUAGES = [
+    { code: "en", label: "English" },
+    { code: "zh", label: "Chinese" },
+    { code: "es", label: "Spanish" },
+    { code: "fr", label: "French" },
+    { code: "de", label: "German" }
+  ];
+
+  const [selectedLang, setSelectedLang] = useState("en");
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [originalDoc, setOriginalDoc] = useState("");
+
+
+  useEffect(() => {
+    if (documentation && originalDoc === "") {
+      setOriginalDoc(documentation);
+    }
+  }, [documentation]);
+  
   // Term detection and markup logic
   useEffect(() => {
     if (isEditing || showSetup) return;
@@ -370,9 +389,13 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
       setSnippet(context);
 
       const rect = span.getBoundingClientRect();
+      // setPopupPos({
+      //   // top: rect.bottom + window.scrollY -220,
+      //   // left: rect.left + window.scrollX-250
+      // });
       setPopupPos({
-        top: rect.bottom + window.scrollY -220,
-        left: rect.left + window.scrollX-250
+        top: window.innerHeight / 2 - 250,
+        left: window.innerWidth / 2 - 300
       });
       setSelectedTerm(span.dataset.term);
     };
@@ -453,7 +476,8 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
         </div>
       )}
 
-      <div className={`documentation-panel ${isLoadingSetup ? "blurred" : ""}`}>
+      {/* <div className={`documentation-panel ${isLoadingSetup ? "blurred" : ""}`}> */}
+      <div className={`documentation-panel ${(isLoadingSetup || isTranslating) ? "blurred" : ""}`}>
         {showSetup ? (
           <div>
             <div className="doc-header">
@@ -515,6 +539,44 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
                 <button className="download-btn" onClick={handleSetupGuide}>
                   Setup Guide
                 </button>
+
+       <select
+  className="download-btn language-select"
+  value={selectedLang}
+  onChange={async (e) => {
+    const newLang = e.target.value;
+    setSelectedLang(newLang);
+
+    if (newLang === "en") {
+      setDocumentation(originalDoc); // 🔁 restore original
+      return;
+    }
+
+    setIsTranslating(true);
+    try {
+      const response = await fetch("http://localhost:5000/translate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: originalDoc, targetLang: newLang }) // 👈 always translate from original
+      });
+      const data = await response.json();
+      if (data.translation) {
+        setDocumentation(data.translation);
+      }
+    } catch (error) {
+      alert("❌ Translation failed");
+      console.error(error);
+    } finally {
+      setIsTranslating(false);
+    }
+  }}
+>
+{LANGUAGES.map((lang) => (
+    <option key={lang.code} value={lang.code}>
+      {lang.label}
+    </option>
+  ))}
+</select>
               </div>
             </div>
 
@@ -554,6 +616,13 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
           />
         </>
       )}
+        {isTranslating && (
+    <div className="translation-spinner-overlay">
+      <div className="spinner" />
+      <div className="spinner-label">  Translating...</div>
+    </div>
+  )}
+  
     </div>
   );
 };

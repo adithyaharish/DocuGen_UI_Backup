@@ -507,3 +507,49 @@ app.post("/compare-branches", async (req, res) => {
     });
   }
 });
+
+
+app.post("/translate", async (req, res) => {
+  const { text, targetLang } = req.body;
+
+  if (!text || !targetLang) {
+    return res.status(400).json({ error: "Missing text or targetLang" });
+  }
+
+  const prompt = `
+You are a technical translator.
+
+Translate the following documentation from English to ${targetLang}.
+🟢 Keep **Markdown structure** exactly the same (headings, bullet points, bold, italics, code blocks).
+🟢 Do NOT translate code snippets or inline code (\`like_this()\` or \`\`\`code blocks\`\`\`).
+🟢 Only translate human-readable text — leave technical terms, code, filenames, and URLs as-is.
+
+Here is the documentation to translate:
+-------------------
+${text}
+-------------------
+`;
+
+  try {
+    const gptResponse = await axios.post(GPT_API_URL, {
+      model: "gpt-4",
+      messages: [
+        { role: "system", content: "You are a professional multilingual technical writer." },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.5
+    }, {
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    const translated = gptResponse.data.choices[0].message.content;
+    res.json({ translation: translated });
+
+  } catch (err) {
+    console.error("Translation failed:", err.response?.data || err.message);
+    res.status(500).json({ error: "Failed to translate" });
+  }
+});
