@@ -520,15 +520,17 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
                 <button className="copy-btn" onClick={copyToClipboard}>
                   {copied ? <FaCheck /> : <FaCopy />} {copied ? "Copied!" : "Copy All"}
                 </button>
-                <button className="download-btn" onClick={downloadPDF}>
-                  <FaDownload /> PDF
-                </button>
-                <button onClick={() => exportText("txt")} className="download-btn">
-                  .TXT
-                </button>
-                <button onClick={() => exportText("json")} className="download-btn">
-                  .JSON
-                </button>
+                <div className="dropdown">
+  <button className="download-btn dropdown-toggle">
+    <FaDownload style={{ marginRight: "6px" }} /> Download
+  </button>
+  <div className="dropdown-menu">
+    <button onClick={downloadPDF}>📄 PDF</button>
+    <button onClick={() => exportText("txt")}>📄 TXT</button>
+    <button onClick={() => exportText("json")}>📄 JSON</button>
+  </div>
+</div>
+
                 <button
                   onClick={() => setIsEditing(!isEditing)}
                   className="download-btn"

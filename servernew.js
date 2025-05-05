@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(morgan('dev'));
 
 // Environment variables
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const OPENAI_API_KEY = "";
 const ML_API_URL = "https://docgen-arm.onrender.com/default-doc";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
 let groups = {}; 
