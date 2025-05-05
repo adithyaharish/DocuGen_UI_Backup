@@ -11,10 +11,12 @@ import rehypeRaw from "rehype-raw";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { downloadRequirements } from "./RequirementsDownloader";
+
 
 const TERM_REGEX = /\b([A-Za-z_][A-Za-z0-9_]{2,}(?:\(\))?)\b/g;
 
-const DocumentationPanel = ({ documentation, setDocumentation }) => {
+const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => {
   const containerRef = useRef(null);
   const [selectedTerm, setSelectedTerm] = useState(null);
   const [popupPos, setPopupPos] = useState(null);
@@ -37,6 +39,9 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
   const [isTranslating, setIsTranslating] = useState(false);
   const [originalDoc, setOriginalDoc] = useState("");
 
+  const handleDownloadRequirements = () => {
+    downloadRequirements(githubLink); // replace with actual prop or state variable
+  };  
 
   useEffect(() => {
     if (documentation && originalDoc === "") {
@@ -169,10 +174,15 @@ const DocumentationPanel = ({ documentation, setDocumentation }) => {
       <div className={`documentation-panel ${(isLoadingSetup || isTranslating) ? "blurred" : ""}`}>
         {showSetup ? (
           <div>
+
             <div className="doc-header">
               <h2>Setup Guide</h2>
+              <button className="download-btn2" onClick={handleDownloadRequirements}>
+                📥 Download Requirements
+              </button>
               <button className="close-btn" onClick={() => setShowSetup(false)}>❌</button>
-            </div>
+              </div>
+
             <div className="doc-content">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}

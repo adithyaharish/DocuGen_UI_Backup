@@ -258,7 +258,7 @@ ${documentation}
 Here is the list of files grouped by folders:
 ${JSON.stringify(groups, null, 2)}
 
-Please generate in **Markdown format** with the following sections (no extra headings):
+Please generate in **Markdown format** with only the following sections (no extra headings):
 
 1. **Prerequisites**
 2. **Installation Steps**

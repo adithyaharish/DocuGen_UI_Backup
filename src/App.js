@@ -30,13 +30,15 @@ function App() {
 
   const [baseBranch, setBaseBranch] = useState("");
   const [targetBranch, setTargetBranch] = useState("");
-const [showBranchCompare, setShowBranchCompare] = useState(false);
+  const [showBranchCompare, setShowBranchCompare] = useState(false);
+  const [showcomparebranches, setShowCompareBranches] = useState(false);
 
 
   const handleGenerateDocs = async () => {
     if (!githubLink.trim()) return;
     setChatMessages([]);
     setIsProcessing(true);
+    setShowCompareBranches(true);
     setDocumentation("");
 
     try {
@@ -186,6 +188,7 @@ const [showBranchCompare, setShowBranchCompare] = useState(false);
             {isProcessing ? "Generating..." : "Generate Docs"}
           </button>
 
+          {showcomparebranches && (
           <div className="compare-branches-block">
             <label>Base Branch:</label>
             <select value={baseBranch} onChange={(e) => setBaseBranch(e.target.value)}>
@@ -211,6 +214,7 @@ const [showBranchCompare, setShowBranchCompare] = useState(false);
               Compare
             </button>
           </div>
+          )}
         </aside>
 
         <main className="main-panel">
@@ -308,6 +312,7 @@ const [showBranchCompare, setShowBranchCompare] = useState(false);
                             },
                           }));
                         }}
+                        githubLink = {githubLink}
                       />
 
                     </div>
