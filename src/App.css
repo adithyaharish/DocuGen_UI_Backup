@@ -58,8 +58,9 @@ body {
   padding: 1rem 2rem;
   display: flex;
   /* justify-content: space-between; */
-  justify-content: flex-start; /* Ensures items are together on the left */
-  gap: 10px; 
+  justify-content: flex-start;
+  /* Ensures items are together on the left */
+  gap: 10px;
   align-items: center;
 }
 
@@ -72,6 +73,7 @@ body {
   cursor: pointer;
   transition: background-color 0.3s;
 }
+
 .toggle-mode-btn:hover {
   background-color: #1e4bb8;
 }
@@ -79,14 +81,16 @@ body {
 /* Layout for the main content */
 .app-body {
   display: flex;
-  flex-direction: row; /* Explicit */
+  flex-direction: row;
+  /* Explicit */
   flex-wrap: nowrap;
   align-items: flex-start;
   width: 100%;
   overflow: hidden;
 }
 
-.sidebar, .main-panel {
+.sidebar,
+.main-panel {
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: 8px;
@@ -131,7 +135,8 @@ body {
 }
 
 .generate-btn:hover {
-  background-color: #1e4bb8; /* Slightly darker shade of primary color */
+  background-color: #1e4bb8;
+  /* Slightly darker shade of primary color */
   transform: translateY(-1px);
 }
 
@@ -206,14 +211,60 @@ body {
 
 .version-actions {
   display: flex;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 
-.version-item:hover .version-actions {
-  opacity: 1;
+/* Shared button base style */
+.version-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.92rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
 }
+
+/* ✏️ Rename */
+.rename-btn {
+  background: #eaf4ff;
+  color: #0353a4;
+}
+
+.rename-btn:hover {
+  background-color: #d4eaff;
+  transform: translateY(-1px);
+}
+
+/* 🗑️ Delete */
+.delete-btn {
+  background-color: #fff0f0;
+  color: #b30000;
+}
+
+.delete-btn:hover {
+  background-color: #ffd6d6;
+  transform: translateY(-1px);
+}
+
+/* 🧾 Compare with Original */
+.compare-btn {
+  background-color: #edf9f3;
+  color: #13795b;
+}
+
+.compare-btn:hover {
+  background-color: #d3f4e4;
+  transform: translateY(-1px);
+}
+
 
 .rename-icon,
 .delete-icon {
@@ -254,8 +305,9 @@ body {
 }
 
 /* Space between GitHub URL and Expertise Level */
-.sidebar > *:not(:last-child) {
-  margin-bottom: 1rem; /* Add spacing between elements */
+.sidebar>*:not(:last-child) {
+  margin-bottom: 1rem;
+  /* Add spacing between elements */
 }
 
 /* Make "Generate Docs" button more prominent */
@@ -272,13 +324,16 @@ body {
 }
 
 .expertise-card:hover {
-  background: rgba(37, 99, 235, 0.1); /* Light blue hover effect */
+  background: rgba(37, 99, 235, 0.1);
+  /* Light blue hover effect */
 }
 
 
 .logo {
-  width: 50px;   /* Adjust size as needed */
-  height: auto;  /* Keep aspect ratio */
+  width: 50px;
+  /* Adjust size as needed */
+  height: auto;
+  /* Keep aspect ratio */
   margin-right: 10px;
 }
 
@@ -293,7 +348,8 @@ body {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 0.5rem; /* Space between icon and text */
+  gap: 0.5rem;
+  /* Space between icon and text */
   transition: background-color 0.2s ease;
   margin-top: 1rem;
 }
@@ -303,8 +359,10 @@ body {
 }
 
 .button-icon {
-  font-size: 1.2rem; /* Adjust icon size */
+  font-size: 1.2rem;
+  /* Adjust icon size */
 }
+
 /* Ensure the main panel is a vertical flex container */
 .main-panel {
   flex: 1;
@@ -326,7 +384,8 @@ body {
   background-color: #fff;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  max-height: none; /* Show more content */
+  max-height: none;
+  /* Show more content */
 }
 
 
@@ -376,8 +435,8 @@ body {
 
 .chat-message.user {
   align-self: flex-end;
-  background-color:  #f0f0f0;
-  color:var(--text-primary);
+  background-color: #f0f0f0;
+  color: var(--text-primary);
 }
 
 .chat-message.system {

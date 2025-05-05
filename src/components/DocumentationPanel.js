@@ -39,16 +39,19 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
   const [isTranslating, setIsTranslating] = useState(false);
   const [originalDoc, setOriginalDoc] = useState("");
 
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const handleDownloadRequirements = () => {
     downloadRequirements(githubLink); // replace with actual prop or state variable
-  };  
+  };
 
   useEffect(() => {
     if (documentation && originalDoc === "") {
       setOriginalDoc(documentation);
     }
   }, [documentation]);
-  
+
   // Term detection and markup logic
   useEffect(() => {
     if (isEditing || showSetup) return;
@@ -71,7 +74,7 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
       const wrapper = span.closest("p, li, pre, div");
       const wrapperText = wrapper?.innerText || span.innerText;
       const termText = span.innerText;
-      
+
       let context = wrapperText;
       if (wrapperText.length > 300) {
         const idx = wrapperText.indexOf(termText);
@@ -108,14 +111,16 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
 
   // Export as different formats
   const exportText = (format) => {
-    const blob = new Blob([format === "json" 
-      ? JSON.stringify({ content: documentation }, null, 2) 
+    const blob = new Blob([format === "json"
+      ? JSON.stringify({ content: documentation }, null, 2)
       : documentation
-    ], { type: {
-      txt: "text/plain",
-      json: "application/json",
-      md: "text/markdown"
-    }[format] });
+    ], {
+      type: {
+        txt: "text/plain",
+        json: "application/json",
+        md: "text/markdown"
+      }[format]
+    });
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -131,12 +136,12 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
     const originalStyle = input.style.cssText;
     input.style.overflow = "visible";
     input.style.maxHeight = "none";
-    
+
     const canvas = await html2canvas(input, { scale: 2 });
     const pdf = new jsPDF("p", "pt", "a4");
     const imgWidth = pdf.internal.pageSize.getWidth();
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
-    
+
     pdf.addImage(canvas, "PNG", 0, 0, imgWidth, imgHeight);
     pdf.save("documentation.pdf");
     input.style.cssText = originalStyle;
@@ -162,6 +167,18 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
     }
   };
 
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+
   return (
     <div className="documentation-panel-wrapper" style={{ position: "relative" }}>
       {isLoadingSetup && (
@@ -181,7 +198,7 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
                 📥 Download Requirements
               </button>
               <button className="close-btn" onClick={() => setShowSetup(false)}>❌</button>
-              </div>
+            </div>
 
             <div className="doc-content">
               <ReactMarkdown
@@ -218,17 +235,22 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
               <div className="button-group">
                 <button className="copy-btn" onClick={copyToClipboard}>
                   {copied ? <FaCheck /> : <FaCopy />} {copied ? "Copied!" : "Copy All"}
-                </button>
-                <button className="download-btn" onClick={downloadPDF}>
-                  <FaDownload /> PDF
-                </button>
-                <button onClick={() => exportText("txt")} className="download-btn">
-                  .TXT
-                </button>
-                <button onClick={() => exportText("json")} className="download-btn">
-                  .JSON
-                </button>
-                <button
+                  </button>
+
+                  <div className="dropdown" ref={dropdownRef}>
+                    <button className="download-btn dropdown-toggle" onClick={() => setIsOpen(prev => !prev)}>
+                      <FaDownload style={{ marginRight: "6px" }} /> Download
+                    </button>
+                    {isOpen && (
+                      <div className="dropdown-menu">
+                        <button onClick={() => { exportText("pdf"); setIsOpen(false); }}>📄 PDF</button>
+                        <button onClick={() => { exportText("txt"); setIsOpen(false); }}>📄 TXT</button>
+                        <button onClick={() => { exportText("json"); setIsOpen(false); }}>📄 JSON</button>
+                      </div>
+                    )}
+                  </div>
+
+                  <button
                   onClick={() => setIsEditing(!isEditing)}
                   className="download-btn"
                   style={{ backgroundColor: "#f2c94c" }}
@@ -239,43 +261,43 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
                   Setup Guide
                 </button>
 
-       <select
-  className="download-btn language-select"
-  value={selectedLang}
-  onChange={async (e) => {
-    const newLang = e.target.value;
-    setSelectedLang(newLang);
+                <select
+                  className="download-btn language-select"
+                  value={selectedLang}
+                  onChange={async (e) => {
+                    const newLang = e.target.value;
+                    setSelectedLang(newLang);
 
-    if (newLang === "en") {
-      setDocumentation(originalDoc); // 🔁 restore original
-      return;
-    }
+                    if (newLang === "en") {
+                      setDocumentation(originalDoc); // 🔁 restore original
+                      return;
+                    }
 
-    setIsTranslating(true);
-    try {
-      const response = await fetch("http://localhost:5000/translate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text: originalDoc, targetLang: newLang }) // 👈 always translate from original
-      });
-      const data = await response.json();
-      if (data.translation) {
-        setDocumentation(data.translation);
-      }
-    } catch (error) {
-      alert("❌ Translation failed");
-      console.error(error);
-    } finally {
-      setIsTranslating(false);
-    }
-  }}
->
-{LANGUAGES.map((lang) => (
-    <option key={lang.code} value={lang.code}>
-      {lang.label}
-    </option>
-  ))}
-</select>
+                    setIsTranslating(true);
+                    try {
+                      const response = await fetch("http://localhost:5000/translate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ text: originalDoc, targetLang: newLang }) // 👈 always translate from original
+                      });
+                      const data = await response.json();
+                      if (data.translation) {
+                        setDocumentation(data.translation);
+                      }
+                    } catch (error) {
+                      alert("❌ Translation failed");
+                      console.error(error);
+                    } finally {
+                      setIsTranslating(false);
+                    }
+                  }}
+                >
+                  {LANGUAGES.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
@@ -307,7 +329,7 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
         <>
           <div className="popup-overlay-lite" onClick={() => setSelectedTerm(null)} />
           <TermPopup
-          
+
             term={selectedTerm}
             snippet={snippet}
             position={popupPos}
@@ -315,13 +337,13 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
           />
         </>
       )}
-        {isTranslating && (
-    <div className="translation-spinner-overlay">
-      <div className="spinner" />
-      <div className="spinner-label">  Translating...</div>
-    </div>
-  )}
-  
+      {isTranslating && (
+        <div className="translation-spinner-overlay">
+          <div className="spinner" />
+          <div className="spinner-label">  Translating...</div>
+        </div>
+      )}
+
     </div>
   );
 };

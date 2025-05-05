@@ -6,10 +6,6 @@ const morgan = require('morgan');
 const app = express();
 const PORT = 5000;
 
-
-const fs = require('fs');
-const path = require('path');
-
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -19,51 +15,10 @@ app.use(morgan('dev'));
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const ML_API_URL = "https://docgen-arm.onrender.com/default-doc";
 const GPT_API_URL = "https://api.openai.com/v1/chat/completions";
-let groups = {}; 
-
-// const groups = {
-//   "SE-UI/src": [
-//     "main.ts",
-//     "server.ts",
-//     "main.server.ts"
-//   ],
-//   "SE-UI/src/app": [
-//     "app.config.server.ts",
-//     "app.module.ts",
-//     "app.config.ts",
-//     "backend.service.spec.ts",
-//     "app.component.spec.ts",
-//     "app.component.ts",
-//     "backend.service.ts"
-//   ],
-//   "SE-UI/src/app/analysis": [
-//     "analysis.component.ts"
-//   ],
-//   "SE-UI/src/app/input": [
-//     "input.component.ts",
-//     "input.component.spec.ts"
-//   ],
-//   "SE-UI/src/app/my-dialog": [
-//     "my-dialog.component.ts",
-//     "my-dialog.component.spec.ts"
-//   ],
-//   "root": [
-//     "LLM_Analysis.py",
-//     "app.py"
-//   ]
-// }
+let groups = {};
 
 // Generate documentation endpoint
 app.post('/generate-docs', async (req, res) => {
-
-  // const guidePath = path.join(__dirname, 'dummy_output.md');
-  // const guideText = fs.readFileSync(guidePath, 'utf-8');
-
-  // res.json({
-  //     gpt_summary: guideText ,
-  //     branches:[]
-  // });
-
 
   try {
     console.log("Received request to /generate-docs");
@@ -175,7 +130,7 @@ app.post('/generate-docs', async (req, res) => {
       details: error.message
     });
   }
-  
+
 });
 
 // Chat endpoint for documentation refinement
@@ -312,9 +267,6 @@ Return only the resulting Markdown.
 
 });
 
-
-
-
 // Prompt creation functions
 function createBeginnerPrompt(summaryContent) {
   return `You are tasked with providing a *beginner-friendly documentation summary* for the following data:\n${summaryContent}\n\nThe user is a beginner, so the explanation should be *clear, simple, and easy to follow. Avoid using technical jargon, and provide **step-by-step instructions* with simple examples.\n\nHere's how the documentation should be structured:\n\n### 1. *Introduction*\nBriefly describe what the project does and its *main benefits*.\n\n### 2. *Prerequisites*\nList all *requirements* to get started.\n\n### 3. *Installation Guide*\nProvide *step-by-step installation instructions*.\n\n### 4. *Quick Start*\nOffer a simple example to get something working immediately.\n\n### 5. *Basic Concepts*\nExplain the *fundamental terms* and concepts.\n\n### 6. *Common Use Cases*\nShow 2-3 simple examples of how the project can be used.\n\n### 7. *Troubleshooting*\nOffer solutions to common beginner problems.\n\n### 8. *FAQs*\nAnswer frequently asked questions.`;
@@ -392,70 +344,70 @@ Explain what **${term}** is (purpose, params/return if applicable, one-sentence 
 /* ────────────────────────────────────────────────────────────
    /term-chat  ‑  follow‑up Q&A inside the TermPopup
    ──────────────────────────────────────────────────────────── */
-   app.post("/term-chat", async (req, res) => {
-    try {
-      const { term, snippet, history } = req.body;
-  
-      // Basic validation ― stop early if something is missing
-      if (!term || !snippet || !Array.isArray(history)) {
-        return res
-          .status(400)
-          .json({ error: "term, snippet & history are all required" });
-      }
-  
-      /* Build the message array
-         history looks like:
-         [
-           { role: "assistant", content: "First answer" },
-           { role: "user",      content: "Follow‑up question" }
-         ]
-      */
-      const messages = [
-        {
-          role: "system",
-          content:
-            "You are a concise senior developer. Answer strictly as Markdown unless asked otherwise.",
-        },
-        {
-          role: "user",
-          content: `Context snippet for the term **${term}**:\n"""${snippet}"""`,
-        },
-        ...history, // alternate assistant / user turns
-      ];
-  
+app.post("/term-chat", async (req, res) => {
+  try {
+    const { term, snippet, history } = req.body;
 
-    
-      const completion = await axios.post(
-        "https://api.openai.com/v1/chat/completions",
-        {
-          model: "gpt-4o-mini", // or "gpt-4" if you prefer
-          messages,
-          temperature: 0.4,
-          max_tokens: 512,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-          },
-        }
-      );
-  
-      // Extract & trim the answer; bail if it came back empty
-      const answer =
-        completion.data.choices?.[0]?.message?.content?.trim() ?? null;
-  
-      if (!answer) {
-        return res.status(502).json({ error: "LLM returned an empty response" });
-      }
-  
-      res.json({ answer });
-    } catch (err) {
-      console.error("term-chat error:", err.response?.data || err.message);
-      res
-        .status(502)
-        .json({ error: "Term‑chat failed — could not reach the language model" });
+    // Basic validation ― stop early if something is missing
+    if (!term || !snippet || !Array.isArray(history)) {
+      return res
+        .status(400)
+        .json({ error: "term, snippet & history are all required" });
     }
-  });
+
+    /* Build the message array
+       history looks like:
+       [
+         { role: "assistant", content: "First answer" },
+         { role: "user",      content: "Follow‑up question" }
+       ]
+    */
+    const messages = [
+      {
+        role: "system",
+        content:
+          "You are a concise senior developer. Answer strictly as Markdown unless asked otherwise.",
+      },
+      {
+        role: "user",
+        content: `Context snippet for the term **${term}**:\n"""${snippet}"""`,
+      },
+      ...history, // alternate assistant / user turns
+    ];
+
+
+
+    const completion = await axios.post(
+      "https://api.openai.com/v1/chat/completions",
+      {
+        model: "gpt-4o-mini", // or "gpt-4" if you prefer
+        messages,
+        temperature: 0.4,
+        max_tokens: 512,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+      }
+    );
+
+    // Extract & trim the answer; bail if it came back empty
+    const answer =
+      completion.data.choices?.[0]?.message?.content?.trim() ?? null;
+
+    if (!answer) {
+      return res.status(502).json({ error: "LLM returned an empty response" });
+    }
+
+    res.json({ answer });
+  } catch (err) {
+    console.error("term-chat error:", err.response?.data || err.message);
+    res
+      .status(502)
+      .json({ error: "Term‑chat failed — could not reach the language model" });
+  }
+});
 
 
 
@@ -478,7 +430,7 @@ app.post("/compare-branches", async (req, res) => {
     const compareUrl = `https://api.github.com/repos/${owner}/${repo}/compare/${base}...${head}`;
 
     console.log(owner, repo, base, head);
-    
+
     const headers = githubToken
       ? { Authorization: `Bearer ${githubToken}` }
       : {};
@@ -494,7 +446,7 @@ app.post("/compare-branches", async (req, res) => {
       patch: file.patch || null,
       blob_url: file.blob_url
     }));
-    
+
 
     res.json({ files });
   } catch (error) {

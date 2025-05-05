@@ -7,7 +7,8 @@
 
 .persona-card {
   padding: 1.1rem;
-  background: var(--surface-color);  /* Use the variable from your variables.css */
+  background: var(--surface-color);
+  /* Use the variable from your variables.css */
   border-radius: 12px;
   border: 1px solid var(--border-color);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -53,7 +54,8 @@
 
 .persona-card {
   padding: 1.1rem;
-  background: var(--surface-color);  /* Use the variable from your variables.css */
+  background: var(--surface-color);
+  /* Use the variable from your variables.css */
   border-radius: 12px;
   border: 1px solid var(--border-color);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -109,11 +111,3 @@
 .branch-selector select option {
   padding: 5px;
 }
-
-
-
-
-
-
-
-

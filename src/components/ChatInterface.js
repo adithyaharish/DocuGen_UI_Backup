@@ -70,7 +70,7 @@ const ChatInterface = ({ messages, onChatSubmit, chatLoading }) => {
       </div>
     </div>
   );
-  
+
 };
 
 export default ChatInterface;

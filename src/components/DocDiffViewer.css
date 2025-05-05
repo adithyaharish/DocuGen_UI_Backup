@@ -1,0 +1,54 @@
+.diff-table {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  font-family: 'Inter', sans-serif;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.diff-header {
+  display: flex;
+  background-color: #f3f3f3;
+  font-weight: bold;
+  text-align: center;
+}
+
+.diff-header>div {
+  flex: 1;
+  padding: 0.75rem;
+  border-right: 1px solid #ccc;
+}
+
+.diff-header>div:last-child {
+  border-right: none;
+}
+
+.diff-row {
+  display: flex;
+}
+
+.diff-cell {
+  flex: 1;
+  padding: 0.75rem;
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  white-space: pre-wrap;
+}
+
+.diff-cell:last-child {
+  border-right: none;
+}
+
+.added {
+  background-color: #eaffea;
+}
+
+.removed {
+  background-color: #ffecec;
+}
+
+.empty {
+  background-color: #f9f9f9;
+}
