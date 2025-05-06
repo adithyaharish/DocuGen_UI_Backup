@@ -40,8 +40,20 @@ function App() {
   const handleGenerateDocs = async () => {
     if (!githubLink.trim()) return;
     setIsProcessing(true);
-    setShowCompareBranches(true);
+    setShowCompareBranches(false);
     setChatMessages([]);
+    setBranches([]);
+
+    setSelectedBranch("");
+    setDocVersions({});
+    setSelectedVersion("");
+    setEditableContent("");
+    setShowDiff(false);
+    setShowBranchCompare(false);
+    setBaseBranch("");
+    setTargetBranch("");
+
+    console.log(githubLink);
 
     try {
       const response = await fetch("/generate-docs", {
@@ -61,11 +73,15 @@ function App() {
       if (data.branches?.length) {
         setBranches(data.branches);
         setSelectedBranch(data.branches[0]);
+
+        setBaseBranch("");
+        setTargetBranch("");
       }
     } catch (err) {
       console.error(err);
     } finally {
       setIsProcessing(false);
+      setShowCompareBranches(true);
     }
   };
 

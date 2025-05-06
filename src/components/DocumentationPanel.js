@@ -47,10 +47,10 @@ const DocumentationPanel = ({ documentation, setDocumentation, githubLink }) => 
   };
 
   useEffect(() => {
-    if (documentation && originalDoc === "") {
+    if (!isEditing && !showSetup && !isTranslating) {
       setOriginalDoc(documentation);
     }
-  }, [documentation]);
+  }, [documentation, isEditing, showSetup, isTranslating]);
 
   // Term detection and markup logic
   useEffect(() => {

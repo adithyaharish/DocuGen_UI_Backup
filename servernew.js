@@ -45,7 +45,7 @@ app.post('/generate-docs', async (req, res) => {
           'Accept': 'application/json'
         }
       });
-      console.log("ML API Response:", mlResponse.data);
+
     } catch (error) {
       console.error("ML API Connection Failed:", error);
       return res.status(502).json({
