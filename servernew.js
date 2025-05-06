@@ -299,17 +299,6 @@ app.get(/(.*)/, (req, res) => {
 
 
 
-// Error handler
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).json({ error: 'Something broke!' });
-// });
-
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
-
 /* ───────── term-info (first blurb) ───────── */
 app.post("/term-info", async (req, res) => {
   const { term, snippet } = req.body;          //  <-- include snippet!
@@ -424,19 +413,20 @@ app.post("/compare-branches", async (req, res) => {
     if (!match) {
       return res.status(400).json({ error: "Invalid GitHub URL" });
     }
-
+  
     const owner = match[1];
     const repo = match[2];
     const compareUrl = `https://api.github.com/repos/${owner}/${repo}/compare/${base}...${head}`;
-
+  
     console.log(owner, repo, base, head);
-
-    const headers = githubToken
-      ? { Authorization: `Bearer ${githubToken}` }
-      : {};
-
+  
+    const headers = {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+      'Accept': 'application/vnd.github+json'
+    };
+  
     const response = await axios.get(compareUrl, { headers });
-
+  
     const files = response.data.files.map((file) => ({
       filename: file.filename,
       status: file.status,
@@ -446,10 +436,9 @@ app.post("/compare-branches", async (req, res) => {
       patch: file.patch || null,
       blob_url: file.blob_url
     }));
-
-
+  
     res.json({ files });
-  } catch (error) {
+  }  catch (error) {
     console.error("Compare error:", error.message);
     res.status(500).json({
       error: "Failed to compare branches",
