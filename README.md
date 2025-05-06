@@ -13,6 +13,8 @@ DocuGen is a fullstack web app that generates intelligent documentation for GitH
 - Choose your learning persona
 - Get contextual project documentation
 - Chat with the AI to refine/clarify the docs
+- Get a SetUp Guide to help you run the code locally
+- Compare branches and their differences in a repo
 
 ## 📂 Code Overview
 - `servernew.js`: Main Express backend file (routes, GPT & ML API calls)
@@ -31,6 +33,7 @@ DocuGen is a fullstack web app that generates intelligent documentation for GitH
 ```bash
 npm install
 npm run build
+npm start
 node servernew.js
 ```
 
