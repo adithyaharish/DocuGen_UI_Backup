@@ -6,7 +6,8 @@ export const downloadRequirements = async (githubUrl) => {
     return;
   }
 
-  const { owner, repo, branch } = extractGitHubDetails(githubUrl);
+  const { owner, repo, branch } = await extractGitHubDetails(githubUrl);
+
   if (!owner || !repo) {
     alert("Invalid GitHub URL");
     return;
@@ -71,15 +72,29 @@ export const downloadRequirements = async (githubUrl) => {
   }
 };
 
-function extractGitHubDetails(url) {
+async function extractGitHubDetails(url) {
   const match = url.match(/github.com\/(.*?)\/(.*?)(?:\/(tree|blob)\/([^\/]+))?(?:\/.+)?$/);
   if (!match) return {};
-  return {
-    owner: match[1],
-    repo: match[2].replace(/\.git$/, ""),
-    branch: match[4] || "main",
-  };
+
+  const owner = match[1];
+  const repo = match[2].replace(/\.git$/, "");
+  let branch = match[4];
+
+  if (!branch) {
+    // Fetch default branch from GitHub
+    try {
+      const meta = await fetch(`https://api.github.com/repos/${owner}/${repo}`);
+      const repoInfo = await meta.json();
+      branch = repoInfo.default_branch || "main";
+    } catch (err) {
+      console.warn("⚠️ Failed to fetch default branch. Falling back to 'main'");
+      branch = "main";
+    }
+  }
+
+  return { owner, repo, branch };
 }
+
 
 function extractImports(filePath, content) {
   const imports = new Set();
