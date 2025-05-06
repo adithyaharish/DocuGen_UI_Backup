@@ -25,13 +25,25 @@ export const downloadRequirements = async (githubUrl) => {
 
     // Priority 2: JS/TS - package.json
     if (filePaths.includes("package.json")) {
-      const res = await fetch(`${rawBase}/package.json`);
-      const pkg = await res.json();
-      const deps = pkg.dependencies || {};
-      const devDeps = pkg.devDependencies || {};
-      const lines = Object.entries({ ...deps, ...devDeps }).map(([pkg, ver]) => `${pkg}@${ver}`);
-      return triggerDownload(lines.join("\n"), "requirements.txt");
+      try {
+        const res = await fetch(`${rawBase}/package.json`);
+        if (!res.ok) throw new Error("Failed to fetch package.json");
+    
+        const pkg = await res.json();
+        const deps = pkg.dependencies || {};
+        const devDeps = pkg.devDependencies || {};
+        const allDeps = { ...deps, ...devDeps };
+        const lines = Object.entries(allDeps).map(([pkg, ver]) => `${pkg}@${ver}`);
+    
+        if (lines.length === 0) throw new Error("No dependencies found in package.json");
+    
+        return triggerDownload(lines.join("\n"), "requirements.txt");
+      } catch (err) {
+        console.warn("⚠️ package.json exists but could not be processed:", err.message);
+        // fallback continues below
+      }
     }
+    
 
     // Priority 3: Java - pom.xml or build.gradle (fetch but don't parse deeply)
     const javaFile = filePaths.find(p => p === "pom.xml" || p === "build.gradle");
